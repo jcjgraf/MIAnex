@@ -2,11 +2,12 @@ module Command where
 
 import Data.Semigroup ((<>))
 import Options.Applicative
+import qualified Git as Git
 
 --- General
 
 data Options = Options
-    { optGlobalFlag :: Bool
+    { optVerbose :: Bool
     , optCommand :: Command
     } deriving (Eq, Show)
 
@@ -18,9 +19,10 @@ data Command
 
 --- Import
 data ImportOptions
-    = New String
-    | Activate String
-    | List Bool
+    = ImportNew Git.Branch
+    | ImportActivate Git.Branch
+    | ImportDeactivate Bool
+    | ImportList Bool
     deriving (Eq, Show)
 
 importCommand :: Mod CommandFields Command
@@ -30,21 +32,27 @@ importCommand =
 importParser :: Parser Command
 importParser =
     Import <$>
-        ( New 
+        ( ImportNew
             <$> strOption
                 ( long "new"
                 <> short 'n'
                 <> metavar "NAME"
                 <> help "Name of the new import"
                 )
-        <|> Activate
+        <|> ImportActivate
             <$> strOption
                 ( long "activate"
                 <> short 'a'
                 <> metavar "IMPORT"
                 <> help "Name of the import to activate"
                 )
-        <|> List
+        <|> ImportDeactivate
+            <$> switch
+                ( long "deactivate"
+                <> short 'd'
+                <> help "Deactivate the import"
+                )
+        <|> ImportList
             <$> switch
                 ( long "list"
                 <> short 'l'
@@ -54,7 +62,7 @@ importParser =
 
 --- Test
 --data TestOptions = TestOptions
- 
+
 testCommand :: Mod CommandFields Command
 testCommand =
     command "test" (info (pure NotImplemented) (progDesc "Test something"))
@@ -67,7 +75,7 @@ testCommand =
 parseOptions :: Parser Options
 parseOptions =
     Options
-        <$> switch (long "global-flag" <> help "Set a global flag")
+        <$> switch (long "verbose" <> short 'v' <> help "Enable verbose output")
         <*> hsubparser (importCommand <> testCommand)
 
 mainParser :: ParserInfo Options

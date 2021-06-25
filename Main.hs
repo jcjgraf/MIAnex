@@ -1,4 +1,3 @@
-import Data.Semigroup ((<>))
 import Options.Applicative
 
 import Command
@@ -12,5 +11,6 @@ main = do
     case optCommand options of
         (Import opts) -> runImport opts
         Test -> putStrLn "Test Stuff!"
+        _ -> putStrLn "Invalid"
 
-    putStrLn ("global flag: " ++ show (optGlobalFlag options))
+    putStrLn ("global flag: " ++ show (optVerbose options))
