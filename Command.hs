@@ -12,14 +12,19 @@ data Options = Options
     } deriving (Eq, Show)
 
 data Command
-    = Import ImportOptions
+    = Import ImportOption
     | Test
     | NotImplemented
     deriving (Eq, Show)
 
 --- Import
-data ImportOptions
-    = ImportNew Git.Branch
+data ImportImagesOptions = ImportImagesOptions
+    { importImagesIdentifer :: String
+    , importImagesCombine :: Bool
+    } deriving (Eq, Show)
+
+data ImportOption
+    = ImportImages [String] ImportImagesOptions
     | ImportActivate Git.Branch
     | ImportDeactivate Bool
     | ImportList Bool
@@ -32,12 +37,24 @@ importCommand =
 importParser :: Parser Command
 importParser =
     Import <$>
-        ( ImportNew
-            <$> strOption
-                ( long "new"
-                <> short 'n'
-                <> metavar "NAME"
-                <> help "Name of the new import"
+        ( ImportImages
+            <$> many ( argument str
+                ( metavar "IMAGES"
+                <> help "Paths to images to import"
+                ))
+            <*> ( ImportImagesOptions
+                <$> strOption
+                    ( long "identifer"
+                    <> short 'i'
+                    <> metavar "IDENTIFIER"
+                    <> help "Name to identify current import"
+                    <> value ""
+                    )
+                <*> switch
+                    ( long "combine"
+                    <> short 'c'
+                    <> help "combine stuff"
+                    )
                 )
         <|> ImportActivate
             <$> strOption
