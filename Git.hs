@@ -5,17 +5,13 @@ import qualified Helper as H
 
 import System.Exit
 import System.Process
-import System.IO ( hGetContents )
+import System.IO (hGetContents)
 
 type Branch = String
 
 runGit :: [String] -> IO String
 runGit args = do
-    (_, Just out, _, ph) <- createProcess(proc "git" args){ cwd = Just archivePath , std_out = CreatePipe }
-    ec <- waitForProcess ph
-    case ec of
-        ExitSuccess   -> hGetContents out >>= return
-        ExitFailure _ -> return []
+    H.runProcess $ createProcess(proc "git" args){ cwd = Just archivePath , std_out = CreatePipe }
 
 --    r <- createProcess(proc "git" args){ cwd = Just archivePath }
 --    case r of
@@ -33,3 +29,20 @@ branchExists :: Branch -> IO Bool
 branchExists branch = do
     branches <- getBranches
     return $ branch `elem` branches
+
+checkoutBranch :: Branch -> [String] -> IO ()
+checkoutBranch branch arg = do
+    exists <- branchExists branch
+
+    if exists then
+        do
+        runGit $ ["checkout", branch] ++ arg
+        putStrLn $ "Changing branch to " ++ branch
+        return ()
+    else
+        do
+        runGit $ ["checkout", "-b", branch] ++ arg
+        putStrLn $ "Branch " ++ branch ++ " does not exists, creating new one"
+        return ()
+
+    return ()
