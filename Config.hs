@@ -1,7 +1,7 @@
 module Config where
 
 progName = "myProg"
-archivePath = "/home/jeanclaude/Images/Archive"
-mainBranch = "master"
+archivePath = "/home/jeanclaude/Images/ArchiveTest"
+mainBranch = "main"
 importBranch = "import/"
-initialCommit = "0288d6e6c64f7c45332c8182c52bcfde41084f6d"
+initialCommit = "a29e769623a6b4a1ad2f9e6f73dc4bf4b6640f06"
