@@ -2,7 +2,9 @@ module Command where
 
 import Data.Semigroup ((<>))
 import Options.Applicative
+
 import qualified Git as Git
+import Helper
 
 --- General
 
@@ -19,12 +21,12 @@ data Command
 
 --- Import
 data ImportImagesOptions = ImportImagesOptions
-    { importImagesIdentifer :: String
+    { importImagesIdentifier :: String
     , importImagesCombine :: Bool
     } deriving (Eq, Show)
 
 data ImportOption
-    = ImportImages [String] ImportImagesOptions
+    = ImportImages [Path] ImportImagesOptions
     | ImportActivate Git.Branch
     | ImportDeactivate Bool
     | ImportList Bool

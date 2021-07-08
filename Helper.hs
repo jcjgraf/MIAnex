@@ -2,13 +2,23 @@ module Helper where
 
 import Data.Char (isSpace)
 import Data.List (dropWhile, dropWhileEnd)
+import System.Directory (doesFileExist)
 import System.Process
 import System.Exit
 import System.IO (hGetContents, Handle)
 
+type Path = String
+
 -- Remove leading and trailing spaces
 trim :: String -> String
 trim = dropWhileEnd isSpace . dropWhile isSpace
+
+-- Check if all files in the given list exists
+-- https://stackoverflow.com/questions/3982491/determine-if-a-list-of-files-exist-in-haskell
+allFilesExist :: [Path] -> IO Bool
+allFilesExist files = do
+    bools <- mapM doesFileExist files
+    return $ foldr (&&) True bools
 
 -- Execute given createProcess
 runProcess :: IO (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle) -> IO String
