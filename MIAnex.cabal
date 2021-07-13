@@ -36,6 +36,7 @@ executable mia
         directory,
         optparse-applicative,
         string-random,
-        text
+        text,
+        ini
     hs-source-dirs:      .
     default-language:    Haskell2010

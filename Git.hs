@@ -1,6 +1,6 @@
 module Git where
 
-import Config
+import qualified Config as Conf
 import qualified Helper as H
 
 import System.Exit
@@ -11,6 +11,7 @@ type Branch = String
 
 runGit :: [String] -> IO String
 runGit args = do
+    archivePath <- Conf.archivePath
     H.runProcess $ createProcess(proc "git" args){ cwd = Just archivePath , std_out = CreatePipe }
 
 --    r <- createProcess(proc "git" args){ cwd = Just archivePath }

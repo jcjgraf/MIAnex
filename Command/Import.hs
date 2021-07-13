@@ -25,7 +25,8 @@ runImport (ImportActivate name) = do
 
 -- deactivate
 runImport (ImportDeactivate True) = do
-    _ <- Git.runGit ["checkout", Conf.mainBranch]
+    mainBranch <- Conf.mainBranch
+    _ <- Git.runGit ["checkout", mainBranch]
     return ()
 
 -- list
@@ -48,23 +49,27 @@ runImport (ImportImages paths@(x:xs) opts) = do
         else  do -- TODO get rid of else
 
         -- Prepare branch
-        Git.checkoutBranch Conf.mainBranch []
+        mainBranch <- Conf.mainBranch
+        Git.checkoutBranch mainBranch []
 
+        initialCommit <- Conf.initialCommit
         identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
-        Git.checkoutBranch ("TEST-" ++ (unpack identifier) ++ "-" ++ importImagesIdentifier opts) [Conf.initialCommit]
+        Git.checkoutBranch ("TEST-" ++ (unpack identifier) ++ "-" ++ importImagesIdentifier opts) [initialCommit]
+
+        archivePath <- Conf.archivePath
 
         -- Copy images to right place
         forM_ paths $ \path -> do
             putStrLn $ "Importing " ++ path
 
-            out <- runProcess $ createProcess(proc "exiftool" ["-o", ".", "-FileName<CreateDate", "-d", "%Y/%y%m%d-" ++ importImagesIdentifier opts ++ "/%y%m%d_%H%M%S%%-c.%%le", "-r", path]){ cwd = Just Conf.archivePath }
+            out <- runProcess $ createProcess(proc "exiftool" ["-o", ".", "-FileName<CreateDate", "-d", "%Y/%y%m%d-" ++ importImagesIdentifier opts ++ "/%y%m%d_%H%M%S%%-c.%%le", "-r", path]){ cwd = Just archivePath }
             putStrLn out
             return ()
         putStrLn "asdfadfs"
         -- Add images to git annex
-        out  <- runProcess $ createProcess(proc "git-annex" ["add", "."]){ cwd = Just Conf.archivePath }
+        out  <- runProcess $ createProcess(proc "git-annex" ["add", "."]){ cwd = Just archivePath }
         putStrLn out
-        out  <- runProcess $ createProcess(proc "git" ["commit", "-m", "INITIAL IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just Conf.archivePath }
+        out  <- runProcess $ createProcess(proc "git" ["commit", "-m", "INITIAL IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just archivePath }
         putStrLn out
 
         -- Verify and cleanup

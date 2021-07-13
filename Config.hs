@@ -1,7 +1,29 @@
 module Config where
 
-progName = "myProg"
-archivePath = "/home/jeanclaude/Images/ArchiveTest"
-mainBranch = "main"
-importBranch = "import/"
-initialCommit = "a29e769623a6b4a1ad2f9e6f73dc4bf4b6640f06"
+import Data.Ini
+import Data.Text
+
+getOption :: String -> String -> IO String
+getOption group option = do
+    config <- readIniFile "mia.ini"
+    case config of
+        Right ini -> do
+            let p = lookupValue (pack group) (pack option) ini
+            return $ case p of
+                        Left s -> s
+                        Right t -> unpack t
+        Left s -> do
+            putStrLn s
+            return ""
+
+archivePath :: IO String
+archivePath = getOption "GENERAL" "archivePath"
+
+mainBranch :: IO String
+mainBranch = getOption "GENERAL" "mainBranch"
+
+importBranch :: IO String
+importBranch = getOption "GENERAL" "importBranch"
+
+initialCommit :: IO String
+initialCommit = getOption "GENERAL" "initialCommit"
