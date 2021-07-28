@@ -15,6 +15,8 @@ data Options = Options
 
 data Command
     = Import ImportOption
+    | Activate ActivateOption
+    | Deactivate
     | Test
     | NotImplemented
     deriving (Eq, Show)
@@ -27,9 +29,12 @@ data ImportImagesOptions = ImportImagesOptions
 
 data ImportOption
     = ImportImages [Path] ImportImagesOptions
-    | ImportActivate Git.Branch
-    | ImportDeactivate Bool
     | ImportList Bool
+    deriving (Eq, Show)
+
+--- Activate
+data ActivateOption
+    = ActivateImport Git.Branch
     deriving (Eq, Show)
 
 importCommand :: Mod CommandFields Command
@@ -46,7 +51,7 @@ importParser =
                 ))
             <*> ( ImportImagesOptions
                 <$> strOption
-                    ( long "identifer"
+                    ( long "identifier"
                     <> short 'i'
                     <> metavar "IDENTIFIER"
                     <> help "Name to identify current import"
@@ -58,19 +63,6 @@ importParser =
                     <> help "combine stuff"
                     )
                 )
-        <|> ImportActivate
-            <$> strOption
-                ( long "activate"
-                <> short 'a'
-                <> metavar "IMPORT"
-                <> help "Name of the import to activate"
-                )
-        <|> ImportDeactivate
-            <$> switch
-                ( long "deactivate"
-                <> short 'd'
-                <> help "Deactivate the import"
-                )
         <|> ImportList
             <$> switch
                 ( long "list"
@@ -78,6 +70,24 @@ importParser =
                 <> help "List all imports"
                 )
     )
+
+activateCommand :: Mod CommandFields Command
+activateCommand =
+    command "activate" (info activateParser (progDesc "Activate import"))
+
+activateParser :: Parser Command
+activateParser =
+    Activate <$>
+        ( ActivateImport
+            <$> argument str
+                ( metavar "IMPORT"
+                <> help "Imporot to activate"
+                )
+        )
+
+deactivateCommand :: Mod CommandFields Command
+deactivateCommand =
+    command "deactivate" (info (pure Deactivate) (progDesc "Deactivate import"))
 
 --- Test
 --data TestOptions = TestOptions
@@ -95,7 +105,7 @@ parseOptions :: Parser Options
 parseOptions =
     Options
         <$> switch (long "verbose" <> short 'v' <> help "Enable verbose output")
-        <*> hsubparser (importCommand <> testCommand)
+        <*> hsubparser (importCommand <> activateCommand <> deactivateCommand <> testCommand)
 
 mainParser :: ParserInfo Options
 mainParser =

@@ -3,7 +3,7 @@ module Command.Import where
 import Command (ImportOption(..), ImportImagesOptions(..))
 import qualified Config as Conf
 import qualified Git as Git
-import Helper (allFilesExist, getDate, getTime, runProcess)
+import Helper (allFilesExist, runProcess)
 
 import Data.Text (pack, unpack)
 import Text.StringRandom (stringRandomIO)
@@ -13,29 +13,10 @@ import Control.Monad (forM_)
 
 runImport :: ImportOption -> IO ()
 
--- activate
-runImport (ImportActivate name) = do
-    exists <- Git.branchExists name
-    case exists of
-        True -> do
-            _ <- Git.runGit ["checkout", name]
-            return ()
-        False -> putStrLn "Error, branch does not exists"
-    return ()
+runImport (ImportImages [] opts) = do
+    putStrLn "No images provided. Import not possible"
+    -- TODO show help
 
--- deactivate
-runImport (ImportDeactivate True) = do
-    mainBranch <- Conf.mainBranch
-    _ <- Git.runGit ["checkout", mainBranch]
-    return ()
-
--- list
-runImport (ImportList True) = do
-    branches <- Git.getBranches
-    putStrLn $ unlines branches
-    return ()
-
--- import
 runImport (ImportImages paths@(x:xs) opts) = do
 
     putStrLn $ show paths ++ show opts ++ importImagesIdentifier opts
@@ -54,7 +35,7 @@ runImport (ImportImages paths@(x:xs) opts) = do
 
         initialCommit <- Conf.initialCommit
         identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
-        Git.checkoutBranch ("TEST-" ++ (unpack identifier) ++ "-" ++ importImagesIdentifier opts) [initialCommit]
+        Git.checkoutBranch ((unpack identifier) ++ "-" ++ importImagesIdentifier opts) [initialCommit]
 
         archivePath <- Conf.archivePath
 
@@ -65,15 +46,18 @@ runImport (ImportImages paths@(x:xs) opts) = do
             out <- runProcess $ createProcess(proc "exiftool" ["-o", ".", "-FileName<CreateDate", "-d", "%Y/%y%m%d-" ++ importImagesIdentifier opts ++ "/%y%m%d_%H%M%S%%-c.%%le", "-r", path]){ cwd = Just archivePath }
             putStrLn out
             return ()
-        putStrLn "asdfadfs"
+
         -- Add images to git annex
         out  <- runProcess $ createProcess(proc "git-annex" ["add", "."]){ cwd = Just archivePath }
         putStrLn out
-        out  <- runProcess $ createProcess(proc "git" ["commit", "-m", "INITIAL IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just archivePath }
+        out  <- runProcess $ createProcess(proc "git" ["commit", "-m", "IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just archivePath }
         putStrLn out
 
         -- Verify and cleanup
         return ()
 
-runImport _ = do
+-- List
+runImport (ImportList True) = do
+    branches <- Git.getBranches
+    putStrLn $ unlines branches
     return ()

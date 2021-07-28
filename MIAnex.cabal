@@ -22,6 +22,8 @@ executable mia
     other-modules:
         Command
         Command.Import
+        Command.Activate
+        Command.Deactivate
         Command.Test
         Config
         Git

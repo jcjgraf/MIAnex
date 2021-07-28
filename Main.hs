@@ -2,6 +2,8 @@ import Options.Applicative
 
 import Command
 import Command.Import (runImport)
+import Command.Activate (runActivate)
+import Command.Deactivate (runDeactivate)
 import Command.Test
 
 main :: IO ()
@@ -10,6 +12,8 @@ main = do
 
     case optCommand options of
         (Import opts) -> runImport opts
+        (Activate opts) -> runActivate opts
+        Deactivate -> runDeactivate
         Test -> putStrLn "Test Stuff!"
         _ -> putStrLn "Invalid"
 
