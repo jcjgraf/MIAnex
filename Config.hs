@@ -5,7 +5,9 @@ import Data.Text
 
 getOption :: String -> String -> IO String
 getOption group option = do
-    config <- readIniFile "mia.ini"
+    config <- readIniFile "/home/jeanclaude/.config/mia/config.ini"
+    -- TODO xdg base dir
+    -- TODO case when file missing
     case config of
         Right ini -> do
             let p = lookupValue (pack group) (pack option) ini
