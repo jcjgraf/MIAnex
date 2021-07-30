@@ -34,3 +34,9 @@ importBranch = getOption "GENERAL" "importBranch"
 
 initialCommit :: IO String
 initialCommit = getOption "GENERAL" "initialCommit"
+
+structN :: IO String
+structN = getOption "STRUCTURE" "normal"
+
+structNI :: IO String
+structNI = getOption "STRUCTURE" "normalIdentifier"
