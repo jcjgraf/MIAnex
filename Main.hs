@@ -17,4 +17,4 @@ main = do
         Test -> putStrLn "Test Stuff!"
         _ -> putStrLn "Invalid"
 
-    putStrLn ("global flag: " ++ show (optVerbose options))
+    --putStrLn ("global flag: " ++ show (optVerbose options))

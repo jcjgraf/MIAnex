@@ -19,8 +19,6 @@ runImport (ImportImages [] opts) = do
 
 runImport (ImportImages paths@(x:xs) opts) = do
 
-    putStrLn $ show paths ++ show opts ++ importImagesIdentifier opts
-
     -- Check if all files exists, else abort
     -- Not race-condition safe
     valid <- allFilesExist paths
@@ -34,6 +32,7 @@ runImport (ImportImages paths@(x:xs) opts) = do
         Git.checkoutBranch mainBranch []
 
         initialCommit <- Conf.initialCommit
+        -- TODO: Make sure branch does not already exist
         identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
         Git.checkoutBranch ((unpack identifier) ++ "-" ++ importImagesIdentifier opts) [initialCommit]
 
