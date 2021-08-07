@@ -34,6 +34,7 @@ branchExists branch = do
 checkoutBranch :: Branch -> [String] -> IO ()
 checkoutBranch branch arg = do
     exists <- branchExists branch
+    -- TODO current branch has * in from
 
     if exists then
         do
@@ -42,8 +43,8 @@ checkoutBranch branch arg = do
         return ()
     else
         do
-        runGit $ ["checkout", "-b", branch] ++ arg
         putStrLn $ "Branch " ++ branch ++ " does not exists, creating new one"
+        runGit $ ["checkout", "-b", branch] ++ arg
         return ()
 
     return ()
