@@ -25,6 +25,7 @@ data Command
 data ImportImagesOptions = ImportImagesOptions
     { importImagesIdentifier :: String
     , importImagesCombine :: Bool
+    , importImagesCurrentBranch :: Bool
     } deriving (Eq, Show)
 
 data ImportOption
@@ -61,6 +62,11 @@ importParser =
                     ( long "combine"
                     <> short 'c'
                     <> help "combine stuff"
+                    )
+                <*> switch
+                    ( long "current"
+                    <> short 'C'
+                    <> help "Import to current branch"
                     )
                 )
         <|> ImportList

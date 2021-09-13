@@ -28,16 +28,25 @@ runImport (ImportImages paths@(x:xs) opts) = do
         else  do -- TODO get rid of else
 
         -- Prepare branch
-        mainBranch <- Conf.mainBranch
-        Git.checkoutBranch mainBranch []
+        branch <- if (importImagesCurrentBranch opts) then do
+                        branch <- Git.getCurrentBranch
+                        return branch
+                    else do
+                        mainBranch <- Conf.mainBranch
+                        Git.checkoutBranch mainBranch []
 
-        initialCommit <- Conf.initialCommit
-        -- TODO: Make sure branch does not already exist
-        identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
-        if null (importImagesIdentifier opts) then do
-            Git.checkoutBranch ((unpack identifier)) [initialCommit]
-        else do
-            Git.checkoutBranch ((unpack identifier) ++ "-" ++ importImagesIdentifier opts) [initialCommit]
+                        initialCommit <- Conf.initialCommit
+                        -- TODO: Make sure branch does not already exist
+                        identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
+                        branchName <- if null (importImagesIdentifier opts) then do
+                                            return $ unpack identifier
+                                        else do
+                                            return $ (unpack identifier) ++ "-" ++ (importImagesIdentifier opts)
+
+                        Git.checkoutBranch branchName [initialCommit]
+                        return branchName
+
+        putStrLn $ "Importing to branch " ++ branch
 
         archivePath <- Conf.archivePath
 

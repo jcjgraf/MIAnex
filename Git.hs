@@ -26,6 +26,11 @@ getBranches = do
     out <- runGit ["--no-pager", "branch", "--list"]
     return $ map H.trim $ lines out
 
+getCurrentBranch :: IO Branch
+getCurrentBranch = do
+    out <- runGit ["branch", "--show-current"]
+    return $ H.trim out
+
 branchExists :: Branch -> IO Bool
 branchExists branch = do
     branches <- getBranches
