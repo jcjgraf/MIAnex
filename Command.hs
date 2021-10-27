@@ -17,6 +17,7 @@ data Command
     = Import ImportOption
     | Activate ActivateOption
     | Deactivate
+    | List
     | Test
     | NotImplemented
     deriving (Eq, Show)
@@ -30,7 +31,6 @@ data ImportImagesOptions = ImportImagesOptions
 
 data ImportOption
     = ImportImages [Path] ImportImagesOptions
-    | ImportList Bool
     deriving (Eq, Show)
 
 --- Activate
@@ -69,12 +69,6 @@ importParser =
                     <> help "Import to current branch"
                     )
                 )
-        <|> ImportList
-            <$> switch
-                ( long "list"
-                <> short 'l'
-                <> help "List all imports"
-                )
     )
 
 activateCommand :: Mod CommandFields Command
@@ -95,6 +89,10 @@ deactivateCommand :: Mod CommandFields Command
 deactivateCommand =
     command "deactivate" (info (pure Deactivate) (progDesc "Deactivate import"))
 
+listCommand :: Mod CommandFields Command
+listCommand =
+    command "list" (info (pure List) (progDesc "List all imports"))
+
 --- Test
 --data TestOptions = TestOptions
 
@@ -111,7 +109,7 @@ parseOptions :: Parser Options
 parseOptions =
     Options
         <$> switch (long "verbose" <> short 'v' <> help "Enable verbose output")
-        <*> hsubparser (importCommand <> activateCommand <> deactivateCommand <> testCommand)
+        <*> hsubparser (importCommand <> activateCommand <> deactivateCommand <> listCommand <> testCommand)
 
 mainParser :: ParserInfo Options
 mainParser =

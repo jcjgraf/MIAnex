@@ -4,6 +4,7 @@ import Command
 import Command.Import (runImport)
 import Command.Activate (runActivate)
 import Command.Deactivate (runDeactivate)
+import Command.List (runList)
 import Command.Test
 
 main :: IO ()
@@ -14,6 +15,7 @@ main = do
         (Import opts) -> runImport opts
         (Activate opts) -> runActivate opts
         Deactivate -> runDeactivate
+        List -> runList
         Test -> putStrLn "Test Stuff!"
         _ -> putStrLn "Invalid"
 

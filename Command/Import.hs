@@ -75,9 +75,3 @@ runImport (ImportImages paths@(x:xs) opts) = do
 
         -- Verify and cleanup
         return ()
-
--- List
-runImport (ImportList True) = do
-    branches <- Git.getBranches
-    putStrLn $ unlines branches
-    return ()

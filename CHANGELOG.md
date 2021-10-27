@@ -5,6 +5,7 @@ All notable changes to MIAnex are documented in this file.
 ## 0.0.1 (unreleased)
 
 ### Added:
+- Command `list` to list all open imports
 - Command `activate IMPORT` to switch to a current import
 - Command `deactivate` to go back to main
 - Command `import [IMAGES]` to create a new import

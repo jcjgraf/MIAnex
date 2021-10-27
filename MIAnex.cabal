@@ -24,6 +24,7 @@ executable mia
         Command.Import
         Command.Activate
         Command.Deactivate
+        Command.List
         Command.Test
         Config
         Git
