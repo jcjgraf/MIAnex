@@ -1,4 +1,6 @@
-module Command.Deactivate where
+module Command.Deactivate (
+runDeactivate
+) where
 
 import qualified Config as Conf
 import qualified Git as Git

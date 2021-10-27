@@ -1,8 +1,16 @@
-module Config where
+module Config (
+    getOption,
+    archivePath,
+    mainBranch,
+    importBranch,
+    initialCommit,
+    structN,
+    structNI
+) where
 
-import Data.Ini
-import Data.Text
-import System.Directory
+import Data.Ini (readIniFile, lookupValue)
+import Data.Text (pack, unpack)
+import System.Directory (getXdgDirectory, XdgDirectory( XdgConfig ), doesFileExist)
 
 getOption :: String -> String -> IO String
 getOption group option = do

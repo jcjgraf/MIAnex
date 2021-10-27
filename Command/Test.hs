@@ -1,6 +1,8 @@
-module Command.Test where
+module Command.Test (
+    runTest
+) where
 
-runTestCmd :: IO ()
-runTestCmd = do
+runTest :: IO ()
+runTest = do
     putStrLn "runTestCmd"
     return ()

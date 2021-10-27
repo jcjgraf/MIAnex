@@ -1,10 +1,15 @@
-module Helper where
+module Helper (
+    Path,
+    trim,
+    allFilesExist,
+    runProcess
+) where
 
 import Data.Char (isSpace)
-import Data.List (dropWhile, dropWhileEnd)
+import Data.List (dropWhileEnd)
 import System.Directory (doesFileExist)
-import System.Process
-import System.Exit
+import System.Process (ProcessHandle, waitForProcess)
+import System.Exit (ExitCode(ExitSuccess, ExitFailure))
 import System.IO (hGetContents, Handle)
 
 type Path = String
@@ -26,7 +31,7 @@ runProcess process = do
     (_, out, _, ph) <- process
     ec <- waitForProcess ph
     case out of -- TODO Simplify structure
-        Just out -> case ec of
-                        ExitSuccess   -> hGetContents out >>= return
+        Just out' -> case ec of
+                        ExitSuccess   -> hGetContents out' >>= return
                         ExitFailure _ -> return []
         Nothing -> return []

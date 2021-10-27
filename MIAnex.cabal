@@ -31,8 +31,22 @@ executable mia
         Helper
     -- other-extensions:
     ghc-options:
-        -Weverything
         -Wall
+        -Wincomplete-uni-patterns
+        -Wincomplete-record-updates
+        -Wmonomorphism-restriction
+        -Wmissing-local-signatures
+        -Wmissing-exported-signatures
+        -Wmissing-export-lists
+        -Wmissing-import-lists
+        -Wmissing-home-modules
+        -Widentities
+        -Wredundant-constraints
+        -Wpartial-fields
+        -Wmissed-specialisations
+        -Wcpp-undef
+        -Wunused-packages
+        -Wunused-type-patterns
     build-depends:
         base,
         process,

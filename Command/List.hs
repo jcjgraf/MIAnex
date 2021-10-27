@@ -1,4 +1,6 @@
-module Command.List where
+module Command.List (
+    runList
+) where
 
 import Data.Text (pack, isInfixOf)
 import qualified Config as Conf

@@ -1,11 +1,18 @@
-module Git where
+module Git(
+    Branch,
+    runGit,
+    getBranches,
+    getCurrentBranch,
+    branchExists,
+    checkoutBranch
+) where
 
 import qualified Config as Conf
 import qualified Helper as H
 
-import System.Exit
-import System.Process
-import System.IO (hGetContents)
+import System.Exit ()
+import System.Process (createProcess, cwd, std_out, proc, StdStream(CreatePipe))
+--import System.IO (hGetContents)
 
 type Branch = String
 
@@ -43,13 +50,13 @@ checkoutBranch branch arg = do
 
     if exists then
         do
-        runGit $ ["checkout", branch] ++ arg
+        _ <- runGit $ ["checkout", branch] ++ arg
         putStrLn $ "Changing branch to " ++ branch
         return ()
     else
         do
         putStrLn $ "Branch " ++ branch ++ " does not exists, creating new one"
-        runGit $ ["checkout", "-b", branch] ++ arg
+        _ <- runGit $ ["checkout", "-b", branch] ++ arg
         return ()
 
     return ()

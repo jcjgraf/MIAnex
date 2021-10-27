@@ -1,6 +1,8 @@
-module Command.Activate where
+module Command.Activate (
+runActivate
+) where
 
-import Command (ActivateOption(..))
+import Command (ActivateOption(ActivateImport))
 import qualified Git as Git
 
 

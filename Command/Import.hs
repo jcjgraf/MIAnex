@@ -1,23 +1,25 @@
-module Command.Import where
+module Command.Import (
+    runImport
+) where
 
-import Command (ImportOption(..), ImportImagesOptions(..))
+import Command (ImportOption(ImportImages), ImportImagesOptions(importImagesCurrentBranch, importImagesIdentifier))
 import qualified Config as Conf
 import qualified Git as Git
 import Helper (allFilesExist, runProcess)
 
 import Data.Text (pack, unpack, replace)
 import Text.StringRandom (stringRandomIO)
-import System.Process hiding (runProcess) -- TODO move fully to helper
+import System.Process (cwd, proc, createProcess) -- TODO move fully to helper
 import Control.Monad (forM_)
 
 
 runImport :: ImportOption -> IO ()
 
-runImport (ImportImages [] opts) = do
+runImport (ImportImages [] _) = do
     putStrLn "No images provided. Import not possible"
     -- TODO show help
 
-runImport (ImportImages paths@(x:xs) opts) = do
+runImport (ImportImages paths opts) = do
 
     -- Check if all files exists, else abort
     -- Not race-condition safe
@@ -70,8 +72,8 @@ runImport (ImportImages paths@(x:xs) opts) = do
         -- Add images to git annex
         out  <- runProcess $ createProcess(proc "git-annex" ["add", "."]){ cwd = Just archivePath }
         putStrLn out
-        out  <- runProcess $ createProcess(proc "git" ["commit", "-m", "IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just archivePath }
-        putStrLn out
+        out'  <- runProcess $ createProcess(proc "git" ["commit", "-m", "IMPORT: " ++ show (length paths) ++ " images"]){ cwd = Just archivePath }
+        putStrLn out'
 
         -- Verify and cleanup
         return ()

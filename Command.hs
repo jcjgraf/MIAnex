@@ -1,10 +1,16 @@
-module Command where
+module Command (
+    Options(optCommand),
+    Command(Import, Activate, Deactivate, List, Test),
+    ImportImagesOptions(importImagesIdentifier, importImagesCurrentBranch),
+    ImportOption(ImportImages),
+    ActivateOption(ActivateImport),
+    mainParser
+) where
 
-import Data.Semigroup ((<>))
-import Options.Applicative
+import Options.Applicative (CommandFields, Mod, Parser, ParserInfo, helper, header, help, info, fullDesc, progDesc, hsubparser, command, long, switch, short, str, argument, value, strOption, metavar, many)
 
 import qualified Git as Git
-import Helper
+import Helper (Path)
 
 --- General
 
