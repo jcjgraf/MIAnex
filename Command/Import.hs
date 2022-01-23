@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Command.Import (
     runImport
 ) where
@@ -5,10 +7,9 @@ module Command.Import (
 import Command (ImportOption(ImportImages), ImportImagesOptions(importImagesCurrentBranch, importImagesIdentifier))
 import qualified Config as Conf
 import qualified Git as Git
-import Helper (allFilesExist, runProcess)
+import Helper (allFilesExist, runProcess, getImageDate, unifyName)
 
 import Data.Text (pack, unpack, replace)
-import Text.StringRandom (stringRandomIO)
 import System.Process (cwd, proc, createProcess) -- TODO move fully to helper
 import Control.Monad (forM_)
 
@@ -19,7 +20,7 @@ runImport (ImportImages [] _) = do
     putStrLn "No images provided. Import not possible"
     -- TODO show help
 
-runImport (ImportImages paths opts) = do
+runImport (ImportImages paths@(firstPath:_) opts) = do
 
     -- Check if all files exists, else abort
     -- Not race-condition safe
@@ -38,15 +39,18 @@ runImport (ImportImages paths opts) = do
                         Git.checkoutBranch mainBranch []
 
                         initialCommit <- Conf.initialCommit
-                        -- TODO: Make sure branch does not already exist
-                        identifier <- stringRandomIO (pack "[0-9a-zA-Z]{10}")
-                        branchName <- if null (importImagesIdentifier opts) then do
-                                            return $ unpack identifier
-                                        else do
-                                            return $ (unpack identifier) ++ "-" ++ (importImagesIdentifier opts)
+                        -- TODO: handle case when not date available
+                        date <- getImageDate firstPath
+                        let branchName = if null (importImagesIdentifier opts) then
+                                            date
+                                        else
+                                            date ++ "-" ++ (importImagesIdentifier opts)
 
-                        Git.checkoutBranch branchName [initialCommit]
-                        return branchName
+                        branches <- Git.getBranches
+                        let uniqueBranchName = unifyName branchName branches
+
+                        Git.checkoutBranch uniqueBranchName [initialCommit]
+                        return uniqueBranchName
 
         putStrLn $ "Importing to branch " ++ branch
 
