@@ -21,6 +21,8 @@ runImport (ImportImages [] _) = do
     -- TODO show help
 
 runImport (ImportImages paths@(firstPath:_) opts) = do
+    
+    -- TODO Check that repo is ready to be imported to
 
     -- Check if all files exists, else abort
     -- Not race-condition safe
