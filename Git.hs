@@ -4,7 +4,8 @@ module Git(
     getBranches,
     getCurrentBranch,
     branchExists,
-    checkoutBranch
+    checkoutBranch,
+    existUncommittedChanges
 ) where
 
 import qualified Config as Conf
@@ -60,3 +61,11 @@ checkoutBranch branch arg = do
         return ()
 
     return ()
+
+existUncommittedChanges :: IO Bool
+existUncommittedChanges = do
+    out <- runGit $ ["status", "-s"]
+    if out == "" then
+        return False
+    else
+        return True

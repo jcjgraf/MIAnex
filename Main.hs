@@ -14,7 +14,7 @@ main = do
     case optCommand options of
         (Import opts) -> runImport opts
         (Activate opts) -> runActivate opts
-        Deactivate -> runDeactivate
+        (Deactivate opts) -> runDeactivate opts
         List -> runList
         Test -> runTest
         _ -> putStrLn "Invalid"

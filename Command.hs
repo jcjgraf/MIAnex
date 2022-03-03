@@ -4,6 +4,7 @@ module Command (
     ImportImagesOptions(importImagesIdentifier, importImagesCurrentBranch),
     ImportOption(ImportImages),
     ActivateOption(ActivateImport),
+    DeactivateOption(DeactivateForce),
     mainParser
 ) where
 
@@ -22,7 +23,7 @@ data Options = Options
 data Command
     = Import ImportOption
     | Activate ActivateOption
-    | Deactivate
+    | Deactivate DeactivateOption
     | List
     | Test
     | NotImplemented
@@ -42,6 +43,11 @@ data ImportOption
 --- Activate
 data ActivateOption
     = ActivateImport Git.Branch
+    deriving (Eq, Show)
+
+-- Deactivate
+data DeactivateOption
+    = DeactivateForce Bool
     deriving (Eq, Show)
 
 importCommand :: Mod CommandFields Command
@@ -93,7 +99,18 @@ activateParser =
 
 deactivateCommand :: Mod CommandFields Command
 deactivateCommand =
-    command "deactivate" (info (pure Deactivate) (progDesc "Deactivate import"))
+    command "deactivate" (info deactivateParser (progDesc "Deactivate import"))
+
+deactivateParser :: Parser Command
+deactivateParser =
+    Deactivate <$>
+        ( DeactivateForce
+            <$> switch
+                ( long "force"
+                <> short 'f'
+                <> help "Force deactivate. All uncommitted changes are lost."
+                )
+        )
 
 listCommand :: Mod CommandFields Command
 listCommand =
