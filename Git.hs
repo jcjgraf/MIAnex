@@ -32,12 +32,12 @@ runGit args = do
 getBranches :: IO [Branch]
 getBranches = do
     out <- runGit ["--no-pager", "branch", "--list"]
-    return $ map H.trim $ lines out
+    return $ map gitTrim $ lines out
 
 getCurrentBranch :: IO Branch
 getCurrentBranch = do
     out <- runGit ["branch", "--show-current"]
-    return $ H.trim out
+    return $ gitTrim out
 
 branchExists :: Branch -> IO Bool
 branchExists branch = do
@@ -69,3 +69,9 @@ existUncommittedChanges = do
         return False
     else
         return True
+
+dropStar :: Branch -> Branch
+dropStar = dropWhile (== '*')
+
+gitTrim :: Branch -> Branch
+gitTrim = H.trim . dropStar . H.trim
