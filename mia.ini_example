@@ -4,6 +4,5 @@ mainBranch = main
 importBranch = import/
 initialCommit = a29e769623a6b4a1ad2f9e6f73dc4bf4b6640f06
 
-[STRUCTURE]
-normal = "%Y/%y%m%d/%y%m%d_%H%M%S%%-c.%%le"
-normalIdentifier = "%Y/%y%m%d-IDENTIFIER/%y%m%d_%H%M%S%%-c.%%le"
+[SCHEMA]
+schema = %Y/%y%m%d*i/%y%m%d_%H%M%S*c.*e
