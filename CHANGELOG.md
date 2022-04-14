@@ -12,4 +12,5 @@ All notable changes to MIAnex are documented in this file.
 - Command `import [IMAGES]` to create a new import
     - Flag `--identifier TEXT` adds an optional identifier
     - Flag `--current` to use the current branch for the import
+    - Flag `--schema SCHEMA` to use schema `SCHEMA` for the import
 - XDG based config file

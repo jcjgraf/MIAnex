@@ -4,7 +4,8 @@ module Config (
     mainBranch,
     importBranch,
     initialCommit,
-    structSchema,
+    schema,
+    defaultSchema,
     Schema
 ) where
 
@@ -45,5 +46,8 @@ importBranch = getOption "GENERAL" "importBranch"
 initialCommit :: IO String
 initialCommit = getOption "GENERAL" "initialCommit"
 
-structSchema :: IO Schema
-structSchema = getOption "SCHEMA" "schema"
+schema :: String -> IO Schema
+schema = getOption "SCHEMA"
+
+defaultSchema :: IO Schema
+defaultSchema = schema "default"
