@@ -5,7 +5,8 @@ module Helper (
     trim,
     allFilesExist,
     runProcess,
-    getImageDate,
+    getImageDateTime,
+    getFormattedImageDateTime,
     unifyName
 ) where
 
@@ -21,9 +22,11 @@ import System.IO (hGetContents, Handle)
 
 type Path = String
 
+
 -- Remove leading and trailing spaces
 trim :: String -> String
 trim = dropWhileEnd isSpace . dropWhile isSpace
+
 
 -- Check if all files in the given list exists
 -- https://stackoverflow.com/questions/3982491/determine-if-a-list-of-files-exist-in-haskell
@@ -31,6 +34,7 @@ allFilesExist :: [Path] -> IO Bool
 allFilesExist files = do
     bools <- mapM doesFileExist files
     return $ foldr (&&) True bools
+
 
 -- Execute given createProcess
 runProcess :: IO (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle) -> IO String
@@ -43,16 +47,22 @@ runProcess process = do
                         ExitFailure _ -> return []
         Nothing -> return []
 
-getImageDate :: Path -> IO String
-getImageDate path = do
+
+getImageDateTime :: Path -> IO UTCTime
+getImageDateTime path = do
     archivePath <- Conf.archivePath
     -- TODO Error Handling
-    out <- runProcess $ createProcess(proc "exiftool" ["-short3", "-dateFormat", "%Y:%m:%d", "-EXIF:CreateDate", path]){ cwd = Just archivePath, std_out = CreatePipe }
+    out <- runProcess $ createProcess(proc "exiftool" ["-short3", "-dateFormat", "%Y:%m:%d %H:%M:%S", "-EXIF:CreateDate", path]){ cwd = Just archivePath, std_out = CreatePipe }
 
-    let imgDate :: UTCTime = parseTimeOrError True defaultTimeLocale "%Y:%m:%d" (trim out) :: UTCTime
-    let imgDateStr :: String = formatTime defaultTimeLocale "%y%m%d" imgDate
+    let dateTime :: UTCTime = parseTimeOrError True defaultTimeLocale "%0Y:%m:%d %H:%M:%S" (trim out)
+    return dateTime
 
-    return imgDateStr
+
+getFormattedImageDateTime :: Path -> String -> IO String
+getFormattedImageDateTime path format = do
+    dateTime :: UTCTime <- getImageDateTime path
+    let dateTimeString :: String = formatTime defaultTimeLocale format dateTime
+    return dateTimeString
 
 
 showZeroPad :: Int -> String

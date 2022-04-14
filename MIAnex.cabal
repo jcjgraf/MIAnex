@@ -51,6 +51,7 @@ executable mia
         base,
         process,
         directory,
+        filepath,
         optparse-applicative,
         text,
         time,

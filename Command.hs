@@ -8,7 +8,7 @@ module Command (
     mainParser
 ) where
 
-import Options.Applicative (CommandFields, Mod, Parser, ParserInfo, helper, header, help, info, fullDesc, progDesc, hsubparser, command, long, switch, short, str, argument, value, strOption, metavar, many)
+import Options.Applicative (CommandFields, Mod, Parser, ParserInfo, helper, header, help, info, fullDesc, progDesc, hsubparser, command, long, switch, short, str, argument, strOption, metavar, many, optional)
 
 import qualified Git as Git
 import Helper (Path)
@@ -31,7 +31,7 @@ data Command
 
 --- Import
 data ImportImagesOptions = ImportImagesOptions
-    { importImagesIdentifier :: String
+    { importImagesIdentifier :: Maybe String
     , importImagesCombine :: Bool
     , importImagesCurrentBranch :: Bool
     } deriving (Eq, Show)
@@ -58,17 +58,20 @@ importParser :: Parser Command
 importParser =
     Import <$>
         ( ImportImages
-            <$> many ( argument str
-                ( metavar "IMAGES"
-                <> help "Paths to images to import"
-                ))
+            <$> many
+                ( argument str
+                    ( metavar "IMAGES"
+                    <> help "Paths to images to import"
+                    )
+                )
             <*> ( ImportImagesOptions
-                <$> strOption
-                    ( long "identifier"
-                    <> short 'i'
-                    <> metavar "IDENTIFIER"
-                    <> help "Name to identify current import"
-                    <> value ""
+                <$> optional
+                    ( strOption
+                        ( long "identifier"
+                        <> short 'i'
+                        <> metavar "IDENTIFIER"
+                        <> help "Name to identify current import"
+                        )
                     )
                 <*> switch
                     ( long "combine"

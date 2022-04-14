@@ -4,13 +4,15 @@ module Config (
     mainBranch,
     importBranch,
     initialCommit,
-    structN,
-    structNI
+    structSchema,
+    Schema
 ) where
 
 import Data.Ini (readIniFile, lookupValue)
 import Data.Text (pack, unpack)
 import System.Directory (getXdgDirectory, XdgDirectory( XdgConfig ), doesFileExist)
+
+type Schema = String
 
 getOption :: String -> String -> IO String
 getOption group option = do
@@ -43,8 +45,5 @@ importBranch = getOption "GENERAL" "importBranch"
 initialCommit :: IO String
 initialCommit = getOption "GENERAL" "initialCommit"
 
-structN :: IO String
-structN = getOption "STRUCTURE" "normal"
-
-structNI :: IO String
-structNI = getOption "STRUCTURE" "normalIdentifier"
+structSchema :: IO Schema
+structSchema = getOption "SCHEMA" "schema"
