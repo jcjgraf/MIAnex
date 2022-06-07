@@ -1,14 +1,14 @@
 module Command (
     Options(optCommand),
     Command(Import, Activate, Deactivate, List, Test),
-    ImportImagesOptions(importImagesIdentifier, importImagesCurrentBranch),
+    ImportImagesOptions(importImagesIdentifier, importImagesSchemaName, importImagesCurrentBranch),
     ImportOption(ImportImages),
     ActivateOption(ActivateImport),
     DeactivateOption(DeactivateForce),
     mainParser
 ) where
 
-import Options.Applicative (CommandFields, Mod, Parser, ParserInfo, helper, header, help, info, fullDesc, progDesc, hsubparser, command, long, switch, short, str, argument, strOption, metavar, many, optional)
+import Options.Applicative (CommandFields, Mod, Parser, ParserInfo, helper, header, help, info, fullDesc, progDesc, hsubparser, command, long, switch, short, str, argument, strOption, metavar, many, optional, option, auto, value)
 
 import qualified Git as Git
 import Helper (Path)
@@ -32,7 +32,7 @@ data Command
 --- Import
 data ImportImagesOptions = ImportImagesOptions
     { importImagesIdentifier :: Maybe String
-    , importImagesCombine :: Bool
+    , importImagesSchemaName :: Maybe String
     , importImagesCurrentBranch :: Bool
     } deriving (Eq, Show)
 
@@ -73,14 +73,17 @@ importParser =
                         <> help "Name to identify current import"
                         )
                     )
-                <*> switch
-                    ( long "combine"
-                    <> short 'c'
-                    <> help "combine stuff"
+                <*> optional
+                    ( strOption
+                        ( long "schema"
+                        <> short 's'
+                        <> metavar "NAME"
+                        <> help "NAME of schema to use"
+                        )
                     )
                 <*> switch
                     ( long "current"
-                    <> short 'C'
+                    <> short 'c'
                     <> help "Import to current branch"
                     )
                 )

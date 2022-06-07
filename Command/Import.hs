@@ -1,10 +1,10 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ScopedTypeVariables #-} -- allows for inline type annotation of e.g. lets
 
 module Command.Import (
     runImport
 ) where
 
-import Command (ImportOption(ImportImages), ImportImagesOptions(importImagesCurrentBranch, importImagesIdentifier))
+import Command (ImportOption(ImportImages), ImportImagesOptions(importImagesCurrentBranch, importImagesIdentifier, importImagesSchemaName))
 import qualified Config as Conf
 import Config (Schema)
 import qualified Git as Git
@@ -12,8 +12,8 @@ import Helper (allFilesExist, runProcess, getImageDateTime, getFormattedImageDat
 
 import Prelude hiding (tail)
 import Control.Monad (forM_)
-import Data.Text (Text, empty, toUpper, toLower, pack, unpack, replace, tail)
-import Data.Time (UTCTime, defaultTimeLocale, formatTime)
+import Data.Text (Text, empty, toUpper, toLower, pack, unpack, replace, tail, isInfixOf)
+import Data.Time (UTCTime, defaultTimeLocale, formatTime, getCurrentTime)
 import System.Directory (doesFileExist, createDirectoryIfMissing, copyFile)
 import System.FilePath.Posix (takeExtension, takeDirectory, (</>))
 import System.Process (cwd, proc, createProcess) -- TODO move fully to helper
@@ -63,13 +63,24 @@ runImport (ImportImages paths@(firstPath:_) opts) = do
 
         archivePath <- Conf.archivePath
 
-        schema <- Conf.structSchema
+
+        schema <- case (importImagesSchemaName opts) of
+                    Just i -> Conf.schema i
+                    Nothing -> Conf.defaultSchema
+
+        let needMinMax = or [isInfixOf (pack s) (pack schema) | s <- ["*S", "*E"]]
+
+        minMaxDT :: Maybe (UTCTime, UTCTime) <- case needMinMax of
+            True -> do
+                dts <- sequence [getImageDateTime p | p <- paths]
+                return $ Just (minimum dts, maximum dts)
+            False -> do return Nothing
 
         -- Copy images to right place
         forM_ paths $ \path -> do
             putStrLn $ "Importing " ++ path
 
-            relSchema <- formatSchema schema path (importImagesIdentifier opts)
+            relSchema <- formatSchema schema path (importImagesIdentifier opts) minMaxDT
 
             let absSchema = archivePath </> relSchema
 
@@ -85,26 +96,36 @@ runImport (ImportImages paths@(firstPath:_) opts) = do
         return ()
 
 
-formatSchema :: Schema -> Path -> Maybe String -> IO String
-formatSchema rawSchema path identifier =
+formatSchema :: Schema -> Path -> Maybe String -> Maybe (UTCTime, UTCTime) -> IO String
+formatSchema rawSchema path identifier minMaxDT =
     -- Replaces everything except the count
     do
+        putStrLn $ "Preformat: " ++ rawSchema
         -- todo: deal with images w/o metadata
         dateTime :: UTCTime <- getImageDateTime path
         let ext :: String = takeExtension path
 
-        let replDateTime  = (\a -> pack $ formatTime defaultTimeLocale (unpack a) dateTime)
-        let replIdent = case identifier of
-                            Just i  -> replace (pack "*i") (pack ("-" ++ i))
-                            Nothing -> replace (pack "*i") empty
-        let replExtSmall | ext == "" = replace (pack "*e") empty
-                         | otherwise = replace (pack "*e") (toLower (tail (pack ext)))
-        let replExtLarge | ext == "" = replace (pack "*E") empty
-                         | otherwise = replace (pack "*E") (toUpper (tail (pack ext)))
+        let a :: Text = ((replMinMaxDt minMaxDT) . (replDateTime dateTime) . (replIdent identifier) . (replExt ext)) (pack rawSchema)
 
-        let a :: Text = (replDateTime . replIdent . replExtSmall . replExtLarge) (pack rawSchema)
-
+        putStrLn $ "Postformat: " ++ (unpack a)
         return $ unpack a
+    where
+        replDateTime :: UTCTime -> Text -> Text
+        replDateTime dt s = pack $ formatTime defaultTimeLocale (unpack s) dt
+
+        replMinMaxDt :: Maybe (UTCTime, UTCTime) -> Text -> Text
+        replMinMaxDt Nothing               = id
+        replMinMaxDt (Just (minDt, maxDt)) = (replDateTime minDt) . (replace (pack "*S") (pack "%")) . (replDateTime maxDt) . (replace (pack "*E") (pack "%"))
+
+        replIdent :: Maybe String -> Text -> Text
+        replIdent (Just i) = replace (pack "*i") (pack ("-" ++ i))
+        replIdent Nothing  = replace (pack "*i") empty
+
+        replExt :: String -> Text -> Text
+        replExt "" = (replace (pack "*x") empty) . (replace (pack "*X") empty)
+        replExt e  = (replace (pack "*x") (toLower ext)) . (replace (pack "*X") (toUpper ext))
+            where
+                ext = tail (pack e)
 
 
 formatPathSchemaCount :: Path -> Int -> Path
