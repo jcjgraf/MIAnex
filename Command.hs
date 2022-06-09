@@ -14,7 +14,6 @@ import qualified Git as Git
 import Helper (Path)
 
 --- General
-
 data Options = Options
     { optVerbose :: Bool
     , optCommand :: Command
@@ -30,25 +29,15 @@ data Command
     deriving (Eq, Show)
 
 --- Import
+data ImportOption
+    = ImportImages [Path] ImportImagesOptions
+    deriving (Eq, Show)
+
 data ImportImagesOptions = ImportImagesOptions
     { importImagesIdentifier :: Maybe String
     , importImagesSchemaName :: Maybe String
     , importImagesCurrentBranch :: Bool
     } deriving (Eq, Show)
-
-data ImportOption
-    = ImportImages [Path] ImportImagesOptions
-    deriving (Eq, Show)
-
---- Activate
-data ActivateOption
-    = ActivateImport Git.Branch
-    deriving (Eq, Show)
-
--- Deactivate
-data DeactivateOption
-    = DeactivateForce Bool
-    deriving (Eq, Show)
 
 importCommand :: Mod CommandFields Command
 importCommand =
@@ -89,6 +78,11 @@ importParser =
                 )
     )
 
+--- Activate
+data ActivateOption
+    = ActivateImport Git.Branch
+    deriving (Eq, Show)
+
 activateCommand :: Mod CommandFields Command
 activateCommand =
     command "activate" (info activateParser (progDesc "Activate import"))
@@ -99,9 +93,14 @@ activateParser =
         ( ActivateImport
             <$> argument str
                 ( metavar "IMPORT"
-                <> help "Imporot to activate"
+                <> help "Import to activate"
                 )
         )
+
+-- Deactivate
+data DeactivateOption
+    = DeactivateForce Bool
+    deriving (Eq, Show)
 
 deactivateCommand :: Mod CommandFields Command
 deactivateCommand =
@@ -118,6 +117,7 @@ deactivateParser =
                 )
         )
 
+-- List
 listCommand :: Mod CommandFields Command
 listCommand =
     command "list" (info (pure List) (progDesc "List all imports"))
